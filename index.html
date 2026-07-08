@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Covallaby — beautiful coverage reports for your pull requests</title>
+<meta name="description" content="A GitHub-first code coverage tool. One workflow step. No account, no upload token, no dashboard you didn't ask for.">
+<meta property="og:title" content="Covallaby">
+<meta property="og:description" content="Beautiful coverage reports for your pull requests.">
+<meta property="og:image" content="brand/logo.png">
+<link rel="icon" type="image/png" href="brand/logo.png">
+<style>
+  :root {
+    --page:#faf6ee; --surface:#fffdf8; --surface-2:#f3ede0;
+    --ink:#1b1712; --ink-2:#5c554a; --muted:#94896f;
+    --line:#e9e1d1; --accent:#16a34a; --accent-ink:#166534;
+    --good:#0ca30c; --bad:#d03b3b; --code-bg:#211d17; --code-ink:#e9e2d2;
+    --shadow:0 1px 2px rgba(27,23,18,.04), 0 8px 30px rgba(27,23,18,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page:#141210; --surface:#1c1915; --surface-2:#26221c;
+      --ink:#f5f1e8; --ink-2:#c6bda9; --muted:#8d8371;
+      --line:#2e2921; --accent:#22c55e; --accent-ink:#4ade80;
+      --good:#22c55e; --bad:#e66767; --code-bg:#0e0c0a; --code-ink:#e9e2d2;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  * { box-sizing:border-box; margin:0; }
+  html { scroll-behavior:smooth; }
+  body {
+    background:var(--page); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  a { color:var(--accent-ink); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .wrap { max-width:960px; margin:0 auto; padding:0 24px; }
+
+  /* Nav */
+  nav { border-bottom:1px solid var(--line); }
+  nav .wrap { display:flex; align-items:center; gap:20px; height:60px; }
+  nav .brand { display:flex; align-items:center; gap:10px; font-weight:650; letter-spacing:-.01em; color:var(--ink); }
+  nav .brand img { width:26px; height:26px; }
+  nav .spacer { flex:1; }
+  nav .links { display:flex; gap:22px; font-size:14.5px; }
+  nav .links a { color:var(--ink-2); }
+  nav .links a:hover { color:var(--ink); text-decoration:none; }
+
+  /* Hero */
+  header.hero { padding:76px 0 64px; }
+  .hero-grid { display:grid; grid-template-columns:1fr 280px; gap:40px; align-items:center; }
+  h1 { font-size:46px; line-height:1.08; letter-spacing:-.03em; font-weight:700; }
+  h1 .accent { color:var(--accent); }
+  .lede { margin-top:18px; font-size:18.5px; color:var(--ink-2); max-width:34ch; }
+  .hero-mascot { justify-self:end; }
+  .hero-mascot img { width:260px; height:auto; }
+  .cta { margin-top:28px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .btn { display:inline-block; border-radius:10px; padding:10px 18px; font-size:15px; font-weight:550; border:1px solid transparent; }
+  .btn.primary { background:var(--accent); color:#fff; }
+  .btn.primary:hover { background:var(--accent-ink); text-decoration:none; }
+  .btn.ghost { border-color:var(--line); color:var(--ink); background:var(--surface); }
+  .btn.ghost:hover { border-color:var(--muted); text-decoration:none; }
+
+  /* Install block */
+  .install { margin-top:30px; }
+  .install .label { font-size:12.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:8px; }
+  pre.code {
+    background:var(--code-bg); color:var(--code-ink); border-radius:12px;
+    padding:18px 20px; overflow-x:auto; font-size:13.5px; line-height:1.7;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  pre.code .c { color:#8d9a86; }      /* comment */
+  pre.code .k { color:#7fbf7f; }      /* key */
+  pre.code .s { color:#d9b98a; }      /* string */
+
+  /* Sections */
+  section { padding:56px 0; border-top:1px solid var(--line); }
+  h2 { font-size:26px; letter-spacing:-.02em; font-weight:650; }
+  .sub { margin-top:8px; color:var(--ink-2); font-size:16px; }
+
+  /* Feature grid */
+  .features { margin-top:32px; display:grid; grid-template-columns:1fr 1fr; gap:28px 40px; }
+  .feature h3 { font-size:16.5px; font-weight:600; letter-spacing:-.01em; }
+  .feature p { margin-top:5px; color:var(--ink-2); font-size:15px; }
+  .feature .k { color:var(--accent-ink); font-weight:600; }
+
+  /* PR comment mock */
+  .pr { margin-top:28px; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:var(--shadow); overflow:hidden; }
+  .pr .bar { display:flex; align-items:center; gap:8px; padding:10px 16px; border-bottom:1px solid var(--line); font-size:13px; color:var(--muted); }
+  .pr .dot { width:22px; height:22px; border-radius:50%; background:var(--surface-2); display:inline-flex; align-items:center; justify-content:center; }
+  .pr .body { padding:20px 22px; }
+  .pr h4 { font-size:17px; font-weight:650; letter-spacing:-.01em; margin-bottom:4px; }
+  .pr .covered { color:var(--ink-2); margin-bottom:16px; }
+  table.metrics { border-collapse:collapse; font-size:14px; margin-bottom:16px; }
+  table.metrics td { padding:5px 22px 5px 0; border-bottom:1px solid var(--line); }
+  table.metrics td:last-child { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+  table.metrics tr:last-child td { border-bottom:none; }
+  .pr .love { font-size:14px; color:var(--ink-2); }
+  .pr .love code { background:var(--surface-2); padding:2px 6px; border-radius:5px; font-size:12.5px; }
+  .pr .foot { margin-top:14px; font-size:12.5px; color:var(--muted); }
+  .pct-good { color:var(--good); }
+
+  /* Stack chips */
+  .chips { margin-top:24px; display:flex; flex-wrap:wrap; gap:10px; }
+  .chip { border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:7px 15px; font-size:14px; color:var(--ink-2); }
+  .chip b { color:var(--ink); font-weight:600; }
+  .formats { margin-top:16px; font-size:14.5px; color:var(--muted); }
+
+  /* Two products */
+  .cards { margin-top:28px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .card { border:1px solid var(--line); background:var(--surface); border-radius:14px; padding:22px; }
+  .card .tag { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent-ink); font-weight:600; }
+  .card h3 { margin-top:8px; font-size:18px; letter-spacing:-.01em; }
+  .card p { margin-top:6px; color:var(--ink-2); font-size:15px; }
+  .card ul { margin-top:12px; padding-left:18px; color:var(--ink-2); font-size:14.5px; }
+  .card li { margin-bottom:4px; }
+
+  /* Philosophy */
+  .values { margin-top:28px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; }
+  .value b { display:block; font-size:15.5px; letter-spacing:-.01em; }
+  .value span { color:var(--ink-2); font-size:14.5px; }
+
+  footer { border-top:1px solid var(--line); padding:36px 0 56px; color:var(--muted); font-size:14px; }
+  footer .wrap { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  footer img { width:20px; height:20px; }
+  footer .spacer { flex:1; }
+  footer a { color:var(--ink-2); }
+
+  @media (max-width:760px) {
+    h1 { font-size:36px; }
+    .hero-grid, .features, .cards, .values { grid-template-columns:1fr; }
+    .hero-mascot { display:none; }
+    nav .links { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="brand" href="/"><img src="brand/logo.png" alt=""> Covallaby</a>
+  <span class="spacer"></span>
+  <div class="links">
+    <a href="#how">How it works</a>
+    <a href="#stacks">Languages</a>
+    <a href="#tools">Tools</a>
+    <a href="https://github.com/covallaby/action">GitHub</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap"><div class="hero-grid">
+  <div>
+    <h1>You write code.<br><span class="accent">We cover it.</span></h1>
+    <p class="lede">A GitHub-first coverage tool. One workflow step, and every pull request answers the only question that matters&nbsp;— <em>can I merge this?</em></p>
+    <div class="install">
+      <div class="label">Add it to any repo</div>
+      <pre class="code"><span class="k">- uses:</span> <span class="s">covallaby/action@v0.1.1</span>
+  <span class="k">with:</span>
+    <span class="k">files:</span> <span class="s">coverage/lcov.info</span>
+    <span class="k">min-patch:</span> <span class="s">85</span></pre>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/covallaby/action#quick-start">Get started</a>
+      <a class="btn ghost" href="https://github.com/covallaby/action">View on GitHub</a>
+    </div>
+  </div>
+  <div class="hero-mascot"><img src="brand/mascot.png" alt="The Covallaby wallaby holding a coverage checklist"></div>
+</div></div></header>
+
+<section id="what"><div class="wrap">
+  <h2>What lands on every pull request</h2>
+  <p class="sub">One sticky comment, updated in place — never spam. Plus named checks, diff annotations, and a CI gate.</p>
+
+  <div class="pr">
+    <div class="bar"><span class="dot"><img src="brand/logo.png" alt="" style="width:15px;height:15px"></span> covallaby &nbsp;·&nbsp; commented just now</div>
+    <div class="body">
+      <h4>🦘 Covallaby</h4>
+      <div class="covered">You're covered.</div>
+      <table class="metrics">
+        <tr><td>Project coverage</td><td class="pct-good">91.4%</td></tr>
+        <tr><td>Patch coverage</td><td class="pct-good">96.8%</td></tr>
+        <tr><td>Required</td><td>patch 85.0%</td></tr>
+      </table>
+      <div class="love">Nice jump! Every changed line that can be tested, is. 🎉</div>
+      <div class="foot">842 of 921 lines covered across 47 files · Covallaby</div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <h3>Patch coverage, done right</h3>
+      <p>The number that answers <span class="k">can I merge this</span>: coverage of the lines <em>this PR</em> changed. Comments and blank lines never drag it down.</p>
+    </div>
+    <div class="feature">
+      <h3>Fails with a map, not a shrug</h3>
+      <p>“Patch coverage is 72.0%, but 85.0% is required — start with <span class="mono">src/payment.ts:44-45</span>.” Never just “coverage failed.”</p>
+    </div>
+    <div class="feature">
+      <h3>Native GitHub checks</h3>
+      <p><span class="mono">covallaby/patch</span> and <span class="mono">covallaby/project</span> as requirable status checks, a rich Checks-tab entry, and warnings right on the untested lines in the diff.</p>
+    </div>
+    <div class="feature">
+      <h3>No account. No token.</h3>
+      <p>It runs in your workflow with the token GitHub already gives it. Nothing to sign up for, nothing to leak, no dashboard you didn't ask for.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <h2>Two steps. That's the whole setup.</h2>
+  <p class="sub">Your test runner already writes a coverage file. Point Covallaby at it.</p>
+  <pre class="code" style="margin-top:24px"><span class="c"># 1. run your tests with coverage (any runner, any language)</span>
+<span class="k">- run:</span> <span class="s">npm test -- --coverage</span>
+
+<span class="c"># 2. one step — sticky comment, checks, annotations, gate</span>
+<span class="k">- uses:</span> <span class="s">covallaby/action@v0.1.1</span>
+  <span class="k">with:</span>
+    <span class="k">files:</span> <span class="s">coverage/lcov.info</span>
+    <span class="k">min-patch:</span> <span class="s">85</span></pre>
+</div></section>
+
+<section id="stacks"><div class="wrap">
+  <h2>Works with your stack</h2>
+  <p class="sub">Formats are auto-detected from content — no language-specific config.</p>
+  <div class="chips">
+    <span class="chip"><b>JavaScript</b> / TypeScript</span>
+    <span class="chip"><b>Python</b></span>
+    <span class="chip"><b>Java</b> / Kotlin</span>
+    <span class="chip"><b>.NET</b></span>
+    <span class="chip"><b>Swift</b></span>
+    <span class="chip"><b>Go</b></span>
+  </div>
+  <p class="formats">Reads <b class="mono" style="color:var(--ink)">LCOV</b> · <b class="mono" style="color:var(--ink)">JaCoCo</b> · <b class="mono" style="color:var(--ink)">Cobertura</b> · <b class="mono" style="color:var(--ink)">xccov</b>, all normalized into one model.</p>
+</div></section>
+
+<section id="tools"><div class="wrap">
+  <h2>The Action is the product</h2>
+  <p class="sub">Everything else is a bonus you can reach for — or ignore.</p>
+  <div class="cards">
+    <div class="card">
+      <div class="tag">Also included</div>
+      <h3>A CLI that's genuinely useful</h3>
+      <p>Everything the Action does, on your machine — with a beautiful static HTML report.</p>
+      <ul>
+        <li><span class="mono">covallaby report</span> — friendly summary</li>
+        <li><span class="mono">covallaby check</span> — gate on a threshold</li>
+        <li><span class="mono">covallaby html</span> — one-file report, dark mode, search</li>
+        <li><span class="mono">covallaby badge</span> — an SVG badge</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="tag">Optional · self-hosted</div>
+      <h3>Coverage over time</h3>
+      <p>Want history, PR comparisons, hotspots, and live badges? Run one tiny process. Never required.</p>
+      <ul>
+        <li>Built-in SQLite, or your Postgres</li>
+        <li>Runs on a $4 VPS or a Raspberry Pi</li>
+        <li>Never clones or reads your code</li>
+        <li><a href="https://github.com/covallaby/covallaby">covallaby/covallaby →</a></li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="values"><div class="wrap">
+  <h2>Opinionated on purpose</h2>
+  <div class="values">
+    <div class="value"><b>Beautiful by default</b><span>Zero config to start. Good-looking output you'll actually read.</span></div>
+    <div class="value"><b>Friendly, never shaming</b><span>Coverage tools should point at the next step, not wag a finger.</span></div>
+    <div class="value"><b>Open source, MIT</b><span>The Action does nearly everything, standalone. A hosted service will only ever be a bonus.</span></div>
+  </div>
+  <div class="cta" style="margin-top:36px">
+    <a class="btn primary" href="https://github.com/covallaby/action#quick-start">Add Covallaby to a repo</a>
+    <a class="btn ghost" href="https://github.com/covallaby/action/pull/1">See a live PR</a>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <img src="brand/logo.png" alt=""> <span>Covallaby — beautiful coverage reports for your pull requests.</span>
+  <span class="spacer"></span>
+  <a href="https://github.com/covallaby">GitHub</a>
+</div></footer>
+
+</body>
+</html>
