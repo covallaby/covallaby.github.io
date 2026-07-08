@@ -122,6 +122,20 @@
   .value b { display:block; font-size:15.5px; letter-spacing:-.01em; }
   .value span { color:var(--ink-2); font-size:14.5px; }
 
+  /* Dashboard section */
+  .tag-inline { display:inline-block; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent-ink); font-weight:600; }
+  .dash-shot { display:block; position:relative; margin-top:28px; border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow); }
+  .dash-shot img { display:block; width:100%; }
+  .dash-shot:hover { text-decoration:none; }
+  .dash-play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(20,18,16,.28); color:#fff; font-size:15px; font-weight:600; opacity:0; transition:opacity .15s; }
+  .dash-shot:hover .dash-play { opacity:1; }
+  .dash-grid { margin-top:30px; display:grid; grid-template-columns:1fr 1fr; gap:24px 40px; }
+  .dash-grid h3 { font-size:16px; font-weight:600; letter-spacing:-.01em; margin-bottom:8px; }
+  .dash-list { padding-left:18px; color:var(--ink-2); font-size:15px; }
+  .dash-list li { margin-bottom:5px; }
+  .dash-list b { color:var(--ink); }
+
   footer { border-top:1px solid var(--line); padding:36px 0 56px; color:var(--muted); font-size:14px; }
   footer .wrap { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   footer img { width:20px; height:20px; }
@@ -144,7 +158,8 @@
   <div class="links">
     <a href="#how">How it works</a>
     <a href="#stacks">Languages</a>
-    <a href="#tools">Tools</a>
+    <a href="#dashboard">Dashboard</a>
+    <a href="/demo/">Demo</a>
     <a href="https://github.com/covallaby/action">GitHub</a>
   </div>
 </div></nav>
@@ -236,7 +251,7 @@
 
 <section id="tools"><div class="wrap">
   <h2>The Action is the product</h2>
-  <p class="sub">Everything else is a bonus you can reach for — or ignore.</p>
+  <p class="sub">It does nearly everything, standalone. These come along for free.</p>
   <div class="cards">
     <div class="card">
       <div class="tag">Also included</div>
@@ -250,16 +265,52 @@
       </ul>
     </div>
     <div class="card">
-      <div class="tag">Optional · self-hosted</div>
-      <h3>Coverage over time</h3>
-      <p>Want history, PR comparisons, hotspots, and live badges? Run one tiny process. Never required.</p>
+      <div class="tag">Also included</div>
+      <h3>Six languages, four formats</h3>
+      <p>LCOV, JaCoCo, Cobertura, and xccov — auto-detected from content and normalized into one model, so the whole product speaks every stack.</p>
       <ul>
-        <li>Built-in SQLite, or your Postgres</li>
-        <li>Runs on a $4 VPS or a Raspberry Pi</li>
-        <li>Never clones or reads your code</li>
-        <li><a href="https://github.com/covallaby/covallaby">covallaby/covallaby →</a></li>
+        <li>No language-specific configuration</li>
+        <li>Merge shards and mixed suites automatically</li>
+        <li>Patch, project, and new-file thresholds</li>
       </ul>
     </div>
+  </div>
+</div></section>
+
+<section id="dashboard"><div class="wrap">
+  <div class="tag-inline">Optional · self-hosted · never required</div>
+  <h2 style="margin-top:8px">Want coverage over time? Self-host it.</h2>
+  <p class="sub">The Action covers your pull requests without a server. When you want history, a dashboard, and a badge URL — one tiny process gives you the rest. Try it right now, no install:</p>
+
+  <a class="dash-shot" href="/demo/">
+    <img src="brand/dashboard.png" alt="The Covallaby self-hosted dashboard — coverage history, repositories, and recent activity">
+    <span class="dash-play">▶ Open the live demo</span>
+  </a>
+
+  <div class="dash-grid">
+    <div>
+      <h3>Everything you'd expect from a dashboard</h3>
+      <ul class="dash-list">
+        <li>Coverage history and trends per branch</li>
+        <li>Pull-request comparisons against the base</li>
+        <li>Directory tree, treemap, and hotspot analysis</li>
+        <li>Live SVG badges for your README</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Runs anywhere, owns nothing</h3>
+      <ul class="dash-list">
+        <li>Built-in SQLite, or point it at your Postgres</li>
+        <li>Fits on a $4 VPS or a Raspberry Pi — ~50&nbsp;MB RAM</li>
+        <li><b>Never clones or reads your code</b> — only the coverage files CI posts</li>
+        <li>Docker <span class="mono">compose up -d</span> and you're live</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="cta" style="margin-top:28px">
+    <a class="btn primary" href="/demo/">Try the live demo</a>
+    <a class="btn ghost" href="https://github.com/covallaby/covallaby">Self-host it →</a>
   </div>
 </div></section>
 
